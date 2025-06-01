@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patate Loufoque Clicker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7fee7; /* Vert pâle pour le thème patate */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            color: #4a2c00; /* Marron foncé */
+        }
+        .game-container {
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            text-align: center;
+            max-width: 90%;
+            width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative; /* Pour le message de l'utilisateur */
+        }
+        .header {
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            color: #8b5e3c; /* Marron patate */
+            margin-bottom: 10px;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #6a4a2c;
+        }
+        .potato-area {
+            margin-bottom: 20px;
+        }
+        #potato-image {
+            width: 180px;
+            height: 180px;
+            cursor: pointer;
+            transition: transform 0.1s ease-out;
+            border-radius: 50%; /* Pour une forme plus organique */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            background-color: #d2b48c; /* Couleur de patate */
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 100px; /* Taille de l'emoji patate */
+            animation: pulse 2s infinite;
+        }
+        #potato-image:active {
+            transform: scale(0.95);
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .upgrades-section {
+            background-color: #fffaf0; /* Crème clair */
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        h2 {
+            font-size: 1.8rem;
+            color: #8b5e3c;
+            margin-bottom: 15px;
+        }
+        .upgrade-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        .upgrade-item {
+            background-color: #fceecf; /* Jaune pâle */
+            border-radius: 10px;
+            padding: 15px;
+            text-align: left;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .upgrade-item:hover {
+            transform: translateY(-5px);
+        }
+        .upgrade-item h3 {
+            font-size: 1.3rem;
+            color: #6a4a2c;
+            margin-bottom: 5px;
+        }
+        .upgrade-item p {
+            font-size: 0.9rem;
+            color: #7a5a3c;
+            margin-bottom: 10px;
+        }
+        .upgrade-item button {
+            background-color: #a0522d; /* Marron terre */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-out;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+        }
+        .upgrade-item button:hover:not(:disabled) {
+            background-color: #c4683a; /* Marron plus clair */
+            transform: translateY(-2px);
+        }
+        .upgrade-item button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .loufoque-message {
+            margin-top: 20px;
+            font-style: italic;
+            color: #d97706; /* Orange */
+            font-size: 1.1rem;
+            min-height: 30px; /* Pour éviter le CLS */
+        }
+        .user-id-display {
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 15px;
+            word-break: break-all;
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            border: 2px solid #8b5e3c;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            max-width: 80%;
+            text-align: center;
+        }
+        .message-box button {
+            background-color: #a0522d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        .message-box button:hover {
+            background-color: #c4683a;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>Patate Loufoque Clicker</h1>
+        </div>
+
+        <div class="stats">
+            <div>Patates: <span id="potato-count">0</span></div>
+            <div>Patates/sec: <span id="pps-count">0</span></div>
+        </div>
+
+        <div class="potato-area">
+            <div id="potato-image" role="button" aria-label="Cliquez sur la patate">🥔</div>
+        </div>
+
+        <div class="loufoque-message" id="loufoque-message"></div>
+
+        <div class="upgrades-section">
+            <h2>Améliorations</h2>
+            <div class="upgrade-list" id="upgrade-list">
+                </div>
+        </div>
+        <div class="user-id-display">
+            Votre ID utilisateur: <span id="user-id">Chargement...</span>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box">
+        <p id="message-content"></p>
+        <button id="message-ok-button">OK</button>
+    </div>
+
+    <script type="module">
+        // Import des modules Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Variables globales Firebase
+        let app;
+        let db;
+        let auth;
+        let userId = 'loading'; // Valeur par défaut avant l'authentification
+        let isAuthReady = false; // Indicateur pour savoir si l'authentification est prête
+
+        // Variables du jeu
+        let potatoCount = 0;
+        let pps = 0; // Potatoes per second
+        let clickPower = 1;
+        let purchasedUpgrades = {}; // { upgradeId: count }
+
+        // Éléments du DOM
+        const potatoCountDisplay = document.getElementById('potato-count');
+        const ppsCountDisplay = document.getElementById('pps-count');
+        const potatoImage = document.getElementById('potato-image');
+        const upgradeListDiv = document.getElementById('upgrade-list');
+        const loufoqueMessageDiv = document.getElementById('loufoque-message');
+        const userIdDisplay = document.getElementById('user-id');
+        const messageBox = document.getElementById('message-box');
+        const messageContent = document.getElementById('message-content');
+        const messageOkButton = document.getElementById('message-ok-button');
+
+        // Définition des améliorations
+        const upgrades = [
+            { id: 'fork', name: 'Fourchette en Plastique', cost: 10, pps: 0.1, click: 0, description: 'Une fourchette basique pour piquer plus vite.', loufoque: 0 },
+            { id: 'spoon', name: 'Cuillère Rouillée', cost: 50, pps: 0.5, click: 0, description: 'Un peu de rouille, beaucoup de saveur.', loufoque: 0 },
+            { id: 'potato_peeler', name: 'Éplucheur Automatique', cost: 100, pps: 1, click: 0, description: 'Épluche les patates pendant que vous dormez.', loufoque: 0 },
+            { id: 'potato_gun', name: 'Pistolet à Patates', cost: 500, pps: 5, click: 2, description: 'Tire des patates à grande vitesse. Très efficace.', loufoque: 1 },
+            { id: 'potato_farm', name: 'Mini-Ferme de Patates', cost: 1000, pps: 10, click: 0, description: 'Quelques patates poussent toutes seules.', loufoque: 1 },
+            { id: 'potato_golem', name: 'Goléms de Patates', cost: 5000, pps: 50, click: 0, description: 'Des créatures faites de patates qui en produisent d\'autres.', loufoque: 2 },
+            { id: 'potato_dimension', name: 'Portail vers la Dimension Patate', cost: 10000, pps: 100, click: 5, description: 'Ouvre un portail vers un monde où tout est patate.', loufoque: 3 },
+            { id: 'potato_god', name: 'Invocation du Dieu Patate', cost: 50000, pps: 500, click: 0, description: 'Le Dieu Patate bénit vos récoltes avec une abondance divine... et des yeux.', loufoque: 4 },
+            { id: 'potato_singularity', name: 'Singularité Patatière', cost: 100000, pps: 1000, click: 10, description: 'Toute la réalité se transforme en purée de patate. Irréversible.', loufoque: 5 },
+            { id: 'potato_black_hole', name: 'Trou Noir de Patates', cost: 500000, pps: 5000, click: 0, description: 'Un trou noir qui aspire tout et le recrache en patates frites.', loufoque: 6 },
+            { id: 'potato_universe', name: 'L\'Univers est une Patate', cost: 1000000, pps: 10000, click: 20, description: 'Il n\'y a plus rien d\'autre que des patates. Vous avez gagné ?', loufoque: 7 }
+        ];
+
+        // Messages loufoques déclenchés par le niveau de loufoquerie des améliorations
+        const loufoqueMessages = [
+            "Vous sentez une légère odeur de frites... ou est-ce juste votre imagination ?",
+            "Les patates commencent à vous regarder. C'est normal, n'est-ce pas ?",
+            "Votre voisin vous a demandé si vous aviez vu son tracteur. Vous n'avez pas de tracteur.",
+            "Les nuages ressemblent étrangement à des pommes de terre au four.",
+            "Vous avez l'impression que la patate sur l'écran vous fait un clin d'œil.",
+            "Les patates chantent une berceuse. C'est... apaisant ?",
+            "Votre chat a commencé à miauler en 'patate'.",
+            "Vous avez trouvé une patate qui ressemble exactement à votre grand-mère.",
+            "Le gouvernement a décrété que les patates sont désormais la monnaie officielle.",
+            "L'espace est rempli de patates géantes flottantes.",
+            "Vous vous réveillez et réalisez que vous êtes une patate. C'était un rêve... n'est-ce pas ?",
+            "Félicitations ! Vous avez transformé la réalité en purée de patate. Le jeu est terminé. Ou commence-t-il ?"
+        ];
+
+        // Fonction pour afficher un message personnalisé
+        function showMessage(message) {
+            messageContent.textContent = message;
+            messageBox.style.display = 'flex';
+        }
+
+        // Gérer le clic sur le bouton OK du message
+        messageOkButton.addEventListener('click', () => {
+            messageBox.style.display = 'none';
+        });
+
+        // Initialisation de Firebase
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+
+        // Gestion de l'authentification
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                userIdDisplay.textContent = userId;
+                isAuthReady = true;
+                await loadGameState(); // Charger l'état du jeu après l'authentification
+            } else {
+                // Si pas d'utilisateur, se connecter anonymement
+                try {
+                    if (typeof __initial_auth_token !== 'undefined') {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Erreur lors de la connexion Firebase:", error);
+                    showMessage("Erreur de connexion : " + error.message);
+                }
+            }
+        });
+
+        // Sauvegarder l'état du jeu dans Firestore
+        async function saveGameState() {
+            if (!isAuthReady || userId === 'loading') {
+                console.warn("Firebase non prêt ou userId non défini pour la sauvegarde.");
+                return;
+            }
+            try {
+                const gameRef = doc(db, `artifacts/${appId}/users/${userId}/potato_clicker_game`, 'gameState');
+                await setDoc(gameRef, {
+                    potatoCount: potatoCount,
+                    pps: pps,
+                    clickPower: clickPower,
+                    purchasedUpgrades: purchasedUpgrades
+                });
+                // console.log("État du jeu sauvegardé.");
+            } catch (e) {
+                console.error("Erreur lors de la sauvegarde de l'état du jeu: ", e);
+            }
+        }
+
+        // Charger l'état du jeu depuis Firestore
+        async function loadGameState() {
+            if (!isAuthReady || userId === 'loading') {
+                console.warn("Firebase non prêt ou userId non défini pour le chargement.");
+                return;
+            }
+            try {
+                const gameRef = doc(db, `artifacts/${appId}/users/${userId}/potato_clicker_game`, 'gameState');
+                const docSnap = await getDoc(gameRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    potatoCount = data.potatoCount || 0;
+                    pps = data.pps || 0;
+                    clickPower = data.clickPower || 1;
+                    purchasedUpgrades = data.purchasedUpgrades || {};
+                    console.log("État du jeu chargé.", data);
+                } else {
+                    console.log("Aucun état de jeu trouvé, démarrage d'une nouvelle partie.");
+                }
+                updateDisplay();
+                renderUpgrades(); // Rendre les améliorations après le chargement
+            } catch (e) {
+                console.error("Erreur lors du chargement de l'état du jeu: ", e);
+                showMessage("Erreur lors du chargement de votre progression. Une nouvelle partie va commencer.");
+            }
+        }
+
+        // Récupérer l'ID de l'application
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        // Fonction pour mettre à jour l'affichage
+        function updateDisplay() {
+            potatoCountDisplay.textContent = Math.floor(potatoCount).toLocaleString('fr-FR');
+            ppsCountDisplay.textContent = pps.toFixed(1).toLocaleString('fr-FR');
+            renderUpgrades(); // S'assurer que les boutons sont activés/désactivés
+        }
+
+        // Fonction pour gérer le clic sur la patate
+        potatoImage.addEventListener('click', () => {
+            potatoCount += clickPower;
+            updateDisplay();
+            saveGameState(); // Sauvegarder après chaque clic pour les sessions courtes
+        });
+
+        // Fonction pour acheter une amélioration
+        function buyUpgrade(upgradeId) {
+            const upgrade = upgrades.find(u => u.id === upgradeId);
+            if (upgrade && potatoCount >= upgrade.cost) {
+                potatoCount -= upgrade.cost;
+                pps += upgrade.pps;
+                clickPower += upgrade.click;
+
+                if (purchasedUpgrades[upgradeId]) {
+                    purchasedUpgrades[upgradeId]++;
+                } else {
+                    purchasedUpgrades[upgradeId] = 1;
+                }
+
+                // Augmenter le coût de l'amélioration pour la rendre plus difficile
+                upgrade.cost = Math.floor(upgrade.cost * 1.5);
+
+                updateDisplay();
+                saveGameState();
+                triggerLoufoqueMessage(); // Déclencher un message loufoque après l'achat
+            } else {
+                showMessage("Pas assez de patates pour acheter cette amélioration !");
+            }
+        }
+
+        // Fonction pour rendre les améliorations dans le DOM
+        function renderUpgrades() {
+            upgradeListDiv.innerHTML = ''; // Vider la liste existante
+            upgrades.forEach(upgrade => {
+                const upgradeItem = document.createElement('div');
+                upgradeItem.className = 'upgrade-item';
+                const currentCount = purchasedUpgrades[upgrade.id] || 0;
+                const displayCost = upgrade.cost; // Le coût est déjà mis à jour dans l'objet upgrade
+                const displayPps = upgrade.pps * (currentCount + 1); // Montre l'effet de la prochaine amélioration
+                const displayClick = upgrade.click * (currentCount + 1);
+
+                upgradeItem.innerHTML = `
+                    <h3>${upgrade.name} (Possédé: ${currentCount})</h3>
+                    <p>${upgrade.description}</p>
+                    <p>Coût: ${Math.floor(displayCost).toLocaleString('fr-FR')} Patates</p>
+                    <p>Effet: ${upgrade.pps > 0 ? `+${upgrade.pps.toFixed(1)} Patates/sec` : ''} ${upgrade.click > 0 ? `+${upgrade.click} Puissance de clic` : ''}</p>
+                    <button id="buy-${upgrade.id}" ${potatoCount < displayCost ? 'disabled' : ''}>Acheter</button>
+                `;
+                upgradeListDiv.appendChild(upgradeItem);
+
+                const buyButton = document.getElementById(`buy-${upgrade.id}`);
+                buyButton.addEventListener('click', () => buyUpgrade(upgrade.id));
+            });
+        }
+
+        // Fonction pour déclencher un message loufoque
+        function triggerLoufoqueMessage() {
+            // Calculer le niveau de loufoquerie total basé sur les améliorations possédées
+            let totalLoufoqueLevel = 0;
+            for (const upgradeId in purchasedUpgrades) {
+                const count = purchasedUpgrades[upgradeId];
+                const upgrade = upgrades.find(u => u.id === upgradeId);
+                if (upgrade) {
+                    totalLoufoqueLevel += upgrade.loufoque * count;
+                }
+            }
+
+            // Afficher un message loufoque basé sur le niveau
+            if (totalLoufoqueLevel > 0) {
+                const messageIndex = Math.min(Math.floor(totalLoufoqueLevel / 2), loufoqueMessages.length - 1); // Augmenter la fréquence des messages loufoques
+                loufoqueMessageDiv.textContent = loufoqueMessages[messageIndex];
+            } else {
+                loufoqueMessageDiv.textContent = ''; // Pas de message si le niveau est bas
+            }
+        }
+
+        // Boucle de jeu principale (PPS)
+        setInterval(() => {
+            if (isAuthReady) { // S'assurer que Firebase est prêt avant de modifier les comptes
+                potatoCount += pps;
+                updateDisplay();
+                saveGameState(); // Sauvegarder régulièrement
+            }
+ 
